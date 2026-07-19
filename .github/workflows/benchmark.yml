@@ -12,6 +12,7 @@ env:
   DEFAULT_GO_VERSION: "~1.24.0"
 jobs:
   benchmark:
+    if: false
     name: Benchmarks
     runs-on: self-hosted
     steps:

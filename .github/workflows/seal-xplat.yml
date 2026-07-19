@@ -1,0 +1,29 @@
+name: seal-xplat
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, go ${{ matrix.go-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+        go-version: ["1.24.0", "1.23.0", "~1.22.5"]
+        exclude:
+          # Go 1.22.x's linker emits macOS test binaries WITHOUT an LC_UUID load
+          # command, which modern arm64 macos-latest (dyld) refuses to run,
+          # aborting every test binary. Drop only this one leg; 1.22.5 still runs
+          # on Windows, and 1.23/1.24 still run on macOS.
+          - os: macos-latest
+            go-version: "~1.22.5"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Test
+        working-directory: sdk
+        run: go test ./...
